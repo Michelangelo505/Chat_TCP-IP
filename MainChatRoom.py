@@ -5,18 +5,21 @@ import threading
 import time
 
 
-class frame():
-    def __init__(self, ip, port):
-        self.client = ChatClient(ip_server=ip, port=port)
-        self.client.run()
+class WindowApp:
+    def __init__(self, ip, port, name):
+        self.client = ChatClient(ip_server=ip, port=port, name=name)
         self.top = tkinter.Tk()
-        self.top.title("Chatter")
+        self.top.title("ChatRoom")
         self.messages_frame = tkinter.Frame(self.top)
+        self.users_frame = tkinter.Frame(self.top)
         self.my_msg = tkinter.StringVar()  # For the messages to be sent.
-        self.my_msg.set("Type your messages here.")
-        self.scrollbar = tkinter.Scrollbar(self.messages_frame)  # To navigate through past messages.
-        self.msg_list = tkinter.Listbox(self.messages_frame, height=15, width=50, yscrollcommand=self.scrollbar.set)
-        self.entry_field = tkinter.Entry(self.top, textvariable=self.my_msg)
+        self.scrollbar_msg = tkinter.Scrollbar(self.messages_frame)  # To navigate through past messages.
+        self.scrollbar_users = tkinter.Scrollbar(self.users_frame)
+        self.msg_list = tkinter.Listbox(self.messages_frame, height=40, width=100,
+                                        yscrollcommand=self.scrollbar_msg.set)
+        self.users_list = tkinter.Listbox(self.users_frame, height=40, width=30,
+                                          yscrollcommand=self.scrollbar_users.set)
+        self.entry_field = tkinter.Entry(self.top, textvariable=self.my_msg, width=60)
         self.entry_field.bind("<Return>", self.send_message)
         self.send_button = tkinter.Button(self.top, text="Send", command=self.send_message)
         self.top.protocol("WM_DELETE_WINDOW", self.exit_app)
@@ -38,12 +41,15 @@ class frame():
         self.top.quit()
 
     def run(self):
-        self.scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-        self.msg_list.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
-        self.msg_list.pack()
-        self.messages_frame.pack()
-        self.send_button.pack()
-        self.entry_field.pack()
+        self.scrollbar_users.grid(row=0, column=0)
+        self.users_list.grid(row=0, column=0)
+        self.users_frame.grid(row=0, column=0)
+        self.scrollbar_msg.grid(row=0, column=1)
+        self.msg_list.grid(row=0, column=1)
+        self.messages_frame.grid(row=0, column=1)
+        self.send_button.grid(row=1, column=2)
+        self.entry_field.grid(row=1, column=0, columnspan=4)
+        self.client.run()
         threading.Thread(target=self.listen_server, args=(), daemon=True).start()
         tkinter.mainloop()
 
@@ -51,7 +57,8 @@ class frame():
 def main():
     ip = sys.argv[1]
     port = int(sys.argv[2])
-    window = frame(ip, port)
+    name = sys.argv[3]
+    window = WindowApp(ip, port, name)
     window.run()
 
 

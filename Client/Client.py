@@ -4,15 +4,18 @@ import threading
 import time
 import sys
 import select
+from profile.user import UserProfile
 
 
 class ChatClient:
     message_kit = Message()
 
-    def __init__(self, ip_server, port):
+    def __init__(self, ip_server, port, name):
         self.socket_client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.ip = ip_server
         self.port = port
+        self.user = UserProfile()
+        self.user.nickname = name
 
     def listen(self):
 
@@ -34,6 +37,7 @@ class ChatClient:
         host_data = (self.ip, self.port)
         try:
             self.socket_client.connect(host_data)
+            self.send(self.user.nickname)
         except Exception as error:
             # TODO Переделать
             print('Невозможно подключиться !')
@@ -41,22 +45,10 @@ class ChatClient:
             exit()
 
     def close_connection(self):
+        data = 'close'
+        package_message = self.message_kit.get_package(data=data)
+        self.socket_client.send(package_message)
         self.socket_client.close()
-
-        # while True:
-
-    # # Рабочий вариант, но выводит сообщения (если они есть) только после отправки.
-    # read_sockets, write_socket, error_socket = select.select(sockets_list, [], [])
-    # for connection in read_sockets:
-    #     if connection == self.socket_client:
-    #         self.listen()
-    #     else:
-    #         message = sys.stdin.readline()
-    #         package_message = Message.get_package(message)
-    #         self.socket_client.send(package_message)
-    #         sys.stdout.write("<You>")
-    #         sys.stdout.write(message)
-    #         sys.stdout.flush()
 
 
 if __name__ == '__main__':
