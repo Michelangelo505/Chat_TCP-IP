@@ -3,7 +3,7 @@ from Server.Server import ChatServer
 import sys
 
 ip = '192.168.0.9'
-port = 9876
+port = 9875
 if sys.argv[1] == '-c':
     client = ChatClient(ip_server=ip, port=port)
     client.run()

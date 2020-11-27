@@ -1,5 +1,6 @@
 import socket
 import threading
+import pprint
 from Message.message import Message
 
 
@@ -22,24 +23,15 @@ class ChatServer:
         data_package = message_kit.get_package(message_new_client)
         connection.send(data_package)
         while True:
-            try:
-                data = message_kit.get_message(connection=connection)
-                if data:
-                    print(f"<{ip_address}> {data} ")
-                    self.broadcast(message=data, sender=connection)
-            except Exception as error:
-                # TODO логирование
-                continue
+            data = message_kit.get_message(connection=connection)
+            if data:
+                print(f"<{ip_address}> {data} ")
+                data_package = message_kit.get_package(data)
+                self.broadcast(message=data_package, sender=connection)
 
     def broadcast(self, message, sender):
         for connection in self.connections:
-            if connection != sender:
-                try:
-                    connection.send(message)
-                except:
-                    connection.close()
-                    # if the link is broken, we remove the client
-                    self.remove_connection(connection=connection)
+            connection.send(message)
 
     def remove_connection(self, connection):
         if connection in self.connections:
@@ -51,7 +43,8 @@ class ChatServer:
             self.connections.append(connection)
             ip_address = address[0]
             print(f"{ip_address} - connected")
-            thread_messages = threading.Thread(target=self.get_messages, args=(connection, ip_address))
+            print(self.connections)
+            thread_messages = threading.Thread(target=self.get_messages, args=(connection, ip_address), daemon=True)
             thread_messages.start()
 
 
