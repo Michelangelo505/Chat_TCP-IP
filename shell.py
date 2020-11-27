@@ -2,7 +2,7 @@ from Client.Client import ChatClient
 from Server.Server import ChatServer
 import sys
 
-ip = '127.0.0.1'
+ip = '192.168.0.9'
 port = 9876
 if sys.argv[1] == '-c':
     client = ChatClient(ip_server=ip, port=port)

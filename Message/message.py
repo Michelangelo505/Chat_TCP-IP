@@ -9,19 +9,19 @@ class Message:
         # Функция для получения данных
         data = b''
         while len(data) < length_data:
-            packet = connection.recv(length_data - len(data))
-            if not packet:
-                # TODO переделать условие
-                return None
-            data += packet
-        # try:
-        #     packet = connection.recv(length_data - len(data))
-        #     if not packet:
-        #         # TODO переделать условие
-        #         return None
-        #     data += packet
-        # except Exception as error:
-        #     print('Nothing')
+            # packet = connection.recv(length_data - len(data))
+            # if not packet:
+            #     # TODO переделать условие
+            #     return None
+            # data += packet
+            try:
+                packet = connection.recv(length_data - len(data))
+                if not packet:
+                    # TODO переделать условие
+                    return None
+                data += packet
+            except Exception as error:
+                pass
         return data
 
     @staticmethod

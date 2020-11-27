@@ -46,12 +46,13 @@ class ChatServer:
             self.connections.remove(connection)
 
     def run(self):
-        connection, address = self.socket_server.accept()
-        self.connections.append(connection)
-        ip_address = address[0]
-        print(f"{ip_address} - connected")
-        thread_messages = threading.Thread(target=self.get_messages, args=(connection, ip_address))
-        thread_messages.start()
+        while True:
+            connection, address = self.socket_server.accept()
+            self.connections.append(connection)
+            ip_address = address[0]
+            print(f"{ip_address} - connected")
+            thread_messages = threading.Thread(target=self.get_messages, args=(connection, ip_address))
+            thread_messages.start()
 
 
 if __name__ == '__main__':
