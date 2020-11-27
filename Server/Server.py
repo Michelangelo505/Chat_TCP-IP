@@ -27,6 +27,7 @@ class ChatServer:
         message_broadcast = f"<{ip_address}@{name}>connected to channel"
         package_message = self.message_kit.get_package(message_broadcast)
         self.broadcast(package_message)
+        self.send_usernames()
         while True:
             data = self.message_kit.get_message(connection=connection)
             if data:
@@ -36,7 +37,8 @@ class ChatServer:
                     data_package = self.message_kit.get_package(broadcast_message)
                     self.broadcast(message=data_package)
                 else:
-                    data = f"<{ip_address}@{name}>покинул чат"
+                    data = f"<{ip_address}@{name}>left chat"
+                    print(data)
                     data_package = self.message_kit.get_package(data)
                     self.close_connection(connection, name)
                     self.broadcast(message=data_package)
@@ -46,7 +48,16 @@ class ChatServer:
             connection.close()
             self.connections.remove(connection)
             self.nicknames.remove(nick)
-        print(self.nicknames)
+        # print(self.nicknames)
+        self.send_usernames()
+
+    def send_usernames(self):
+        users = "users"
+        package_message = self.message_kit.get_package(users)
+        self.broadcast(package_message)
+        users = ",".join(self.nicknames)
+        package_message = self.message_kit.get_package(users)
+        self.broadcast(package_message)
 
     def broadcast(self, message):
         for connection in self.connections:
@@ -60,7 +71,7 @@ class ChatServer:
             self.connections.append(connection)
             self.nicknames.append(nickname)
             print(self.nicknames)
-            print(f"<{address[0]}@{nickname}> - connected")
+            print(f"<{address}@{nickname}> - connected to channel")
             thread_messages = threading.Thread(target=self.get_messages,
                                                args=(connection, address, nickname), daemon=True)
             thread_messages.start()

@@ -18,20 +18,14 @@ class ChatClient:
         self.user.nickname = name
 
     def listen(self):
-
-        try:
-            message = self.message_kit.get_message(connection=self.socket_client)
-            # message = self.socket_client.recv(1024).decode()
-        except Exception as error:
-            pass
+        message = self.message_kit.get_message(connection=self.socket_client)
+        # message = self.socket_client.recv(1024).decode()
         return message
 
     def send(self, data):
-        try:
-            package_message = self.message_kit.get_package(data=data)
-            self.socket_client.send(package_message)
-        except Exception as error:
-            pass
+        package_message = self.message_kit.get_package(data=data)
+        self.socket_client.send(package_message)
+
 
     def run(self):
         host_data = (self.ip, self.port)

@@ -28,7 +28,13 @@ class WindowApp:
         while True:
             data = self.client.listen()
             if data:
-                self.msg_list.insert(tkinter.END, data)
+                if data == "users":
+                    self.users_list.delete(0, tkinter.END)
+                    users = self.client.listen().split(',')
+                    for user in users:
+                        self.users_list.insert(tkinter.END, user)
+                else:
+                    self.msg_list.insert(tkinter.END, data)
             time.sleep(2)
 
     def send_message(self):
