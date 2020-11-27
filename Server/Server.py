@@ -21,7 +21,9 @@ class ChatServer:
 
     def get_messages(self, connection, ip_address, name):
         message_new_client = "Welcome to this chatroom!"
+        message_broadcast = f"<{ip_address}@{name}>подключился к чату"
         data_package = self.message_kit.get_package(message_new_client)
+        self.broadcast(message_broadcast)
         connection.send(data_package)
         while True:
             data = self.message_kit.get_message(connection=connection)
@@ -32,7 +34,7 @@ class ChatServer:
                     data_package = self.message_kit.get_package(broadcast_message)
                     self.broadcast(message=data_package)
                 else:
-                    data = f"{connection.nickname} - покинул чат"
+                    data = f"<{ip_address}@{name}>покинул чат"
                     data_package = self.message_kit.get_package(data)
                     self.close_connection(connection)
                     self.broadcast(message=data_package)
@@ -56,9 +58,7 @@ class ChatServer:
             user.connection = connection
             user.nickname = self.message_kit.get_message(connection=connection)
             user.address = address[0]
-            message_broadcast = f"<{user.address}@{user.nickname}> - подключился к чату"
             self.connections.append(user)
-            self.broadcast(message_broadcast)
             print(f"<{user.address}@{user.nickname}> - connected")
             thread_messages = threading.Thread(target=self.get_messages,
                                                args=(user.connection, user.address, user.nickname), daemon=True)
