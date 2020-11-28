@@ -10,7 +10,7 @@ class ChatServer:
     nicknames = []
     message_kit = Message()
 
-    def __init__(self, ip_address, port_server, number_listen):
+    def __init__(self, ip_address, port_server, number_listen=2):
         self.ip = ip_address
         self.port = port_server
         self.host_data = (self.ip, self.port)
@@ -20,60 +20,66 @@ class ChatServer:
         self.socket_server.bind(self.host_data)
         self.socket_server.listen(number_listen)
 
-    def get_messages(self, connection, ip_address, name):
+    def get_messages(self, user, num):
         message_new_client = "Welcome to this chatroom!"
         data_package = self.message_kit.get_package(message_new_client)
-        connection.send(data_package)
-        message_broadcast = f"<{ip_address}@{name}>connected to channel"
+        user.connection.send(data_package)
+        message_broadcast = f"<{user.address}@{user.nickname}>connected to channel"
         package_message = self.message_kit.get_package(message_broadcast)
         self.broadcast(package_message)
         self.send_usernames()
         while True:
-            data = self.message_kit.get_message(connection=connection)
+            data = self.message_kit.get_message(connection=user.connection)
             if data:
                 if data != 'close':
-                    print(f"<{ip_address}@{name}> {data} ")
-                    broadcast_message = f"<{ip_address}@{name}>" + data
+                    print(f"<{user.address}@{user.nickname}> {data} ")
+                    broadcast_message = f"<{user.address}@{user.nickname}>" + data
                     data_package = self.message_kit.get_package(broadcast_message)
                     self.broadcast(message=data_package)
                 else:
-                    data = f"<{ip_address}@{name}>left chat"
+                    data = f"<{user.address}@{user.nickname}>left chat"
                     print(data)
                     data_package = self.message_kit.get_package(data)
-                    self.close_connection(connection, name)
+                    self.close_connection(user)
                     self.broadcast(message=data_package)
 
-    def close_connection(self, connection, nick):
-        if connection in self.connections:
-            connection.close()
-            self.connections.remove(connection)
-            self.nicknames.remove(nick)
+    def close_connection(self, user):
+        if user in self.connections:
+            user.connection.close()
+            self.connections.remove(user)
         # print(self.nicknames)
         self.send_usernames()
 
     def send_usernames(self):
-        users = "users"
-        package_message = self.message_kit.get_package(users)
+        cod = "users"
+        package_message = self.message_kit.get_package(cod)
+        names = self.get_usernames()
         self.broadcast(package_message)
-        users = ",".join(self.nicknames)
+        users = ",".join(names)
         package_message = self.message_kit.get_package(users)
         self.broadcast(package_message)
 
+    def get_usernames(self):
+        names = []
+        for user in self.connections:
+            names.append(user.nickname)
+        return names
+
     def broadcast(self, message):
-        for connection in self.connections:
-            connection.send(message)
+        for user in self.connections:
+            user.connection.send(message)
 
     def run(self):
         while True:
             connection, address = self.socket_server.accept()
-            connection = connection
-            nickname = self.message_kit.get_message(connection=connection)
-            self.connections.append(connection)
-            self.nicknames.append(nickname)
-            print(self.nicknames)
-            print(f"<{address}@{nickname}> - connected to channel")
+            user = UserProfile()
+            user.connection = connection
+            user.nickname = self.message_kit.get_message(connection=connection)
+            user.address = address
+            self.connections.append(user)
+            print(f"<{user.address}@{user.nickname}> - connected to channel")
             thread_messages = threading.Thread(target=self.get_messages,
-                                               args=(connection, address, nickname), daemon=True)
+                                               args=(user, 1), daemon=True)
             thread_messages.start()
 
 
