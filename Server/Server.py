@@ -104,7 +104,7 @@ class ChatServer:
             if data:
                 if data != 'close':
                     print(f"<{user.address}@{user.nickname}> {data} ")
-                    broadcast_message = data
+                    broadcast_message = f"{user.nickname}:{data}"
                     data_package = self.message_kit.get_package(broadcast_message)
                     self.broadcast(message=data_package)
 

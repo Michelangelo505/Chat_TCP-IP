@@ -56,8 +56,12 @@ class WindowApp:
                     msg = 'The connection is lost. Another user left the chat'
                     self.msg_list.insert(tkinter.END, msg)
                 else:
-                    decrypt_msg = self.protocol.decrypt_message(data)
-                    self.msg_list.insert(tkinter.END, decrypt_msg)
+                    split_msg = data.split(':')
+                    nickname = split_msg[0]
+                    msg = split_msg[1]
+                    decrypt_msg = self.protocol.decrypt_message(msg)
+                    full_msg = f"{nickname}:{decrypt_msg}"
+                    self.msg_list.insert(tkinter.END, full_msg)
             time.sleep(3)
 
     def send_message(self):
