@@ -1,5 +1,5 @@
 import struct
-
+import base64
 
 class Message:
     __fixed_size = 4
@@ -26,8 +26,9 @@ class Message:
 
     @staticmethod
     def get_package(data):
-        length_message = len(data)
-        binary_data = data.encode()
+        binary_data = data.encode("UTF-8")
+        binary_data = base64.b64encode(binary_data)
+        length_message = len(binary_data)
         package_message = struct.pack('>I', length_message) + binary_data
         return package_message
 
@@ -40,5 +41,6 @@ class Message:
         length_message = struct.unpack('>I', package_length_msg)[0]
         # Получение данных
         binary_message = self.get_data(connection=connection, length_data=length_message)
-        message = binary_message.decode()
+        binary_message = base64.b64decode(binary_message)
+        message = binary_message.decode("UTF-8")
         return message

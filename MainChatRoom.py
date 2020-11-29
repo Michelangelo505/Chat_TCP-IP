@@ -1,12 +1,14 @@
 import sys
 import tkinter
 from Client.Client import ChatClient
+from encryption.protocols import DH
 import threading
 import time
 
 
 class WindowApp:
     def __init__(self, ip, port, name):
+        self.protocol = DH()
         self.client = ChatClient(ip_server=ip, port=port, name=name)
         self.top = tkinter.Tk()
         self.top.title("ChatRoom")
@@ -33,14 +35,36 @@ class WindowApp:
                     users = self.client.listen().split(',')
                     for user in users:
                         self.users_list.insert(tkinter.END, user)
+                elif data == "100":
+                    self.client.send(self.client.user.key_pub)
+                    key_pub_users_1 = self.client.listen()
+                    key_pub_users_2 = self.client.listen()
+                    self.protocol.public_key1 = int(key_pub_users_1)
+                    self.protocol.public_key2 = int(key_pub_users_2)
+                    self.protocol.private_key = int(self.client.user.key_private)
+                    self.client.user.key_partial = self.protocol.generate_partial_key()
+                elif data == "101":
+                    partial_key = str(self.client.user.key_partial)
+                    self.client.send(partial_key)
+                    key_partial_user = self.client.listen()
+                    self.client.user.full_key = self.protocol.generate_full_key(int(key_partial_user))
+                    print(self.client.user.full_key)
+                elif data == "102":
+                    msg = 'connection established'
+                    self.msg_list.insert(tkinter.END, msg)
+                elif data == "103":
+                    msg = 'The connection is lost. Another user left the chat'
+                    self.msg_list.insert(tkinter.END, msg)
                 else:
-                    self.msg_list.insert(tkinter.END, data)
-            time.sleep(2)
+                    decrypt_msg = self.protocol.decrypt_message(data)
+                    self.msg_list.insert(tkinter.END, decrypt_msg)
+            time.sleep(3)
 
     def send_message(self):
         msg = self.my_msg.get()
         self.my_msg.set("")  # Clears input field.
-        self.client.send(msg)
+        encrypt_msg = self.protocol.encrypt_message(msg)
+        self.client.send(encrypt_msg)
 
     def exit_app(self):
         self.client.close_connection()

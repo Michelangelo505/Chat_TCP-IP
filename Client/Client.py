@@ -1,4 +1,5 @@
 import socket
+import random
 from Message.message import Message
 import threading
 import time
@@ -16,6 +17,8 @@ class ChatClient:
         self.port = port
         self.user = UserProfile()
         self.user.nickname = name
+        self.user.key_pub = str(random.randint(100, 400))
+        self.user.key_private = str(random.randint(100, 400))
 
     def listen(self):
         message = self.message_kit.get_message(connection=self.socket_client)
@@ -25,7 +28,6 @@ class ChatClient:
     def send(self, data):
         package_message = self.message_kit.get_package(data=data)
         self.socket_client.send(package_message)
-
 
     def run(self):
         host_data = (self.ip, self.port)
@@ -47,6 +49,6 @@ class ChatClient:
 
 if __name__ == '__main__':
     ip = '127.0.0.1'
-    port = 9876
+    port = 9879
     client = ChatClient(ip_server=ip, port=port)
     client.run()
