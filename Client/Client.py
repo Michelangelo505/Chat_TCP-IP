@@ -35,7 +35,6 @@ class ChatClient:
             self.socket_client.connect(host_data)
             self.send(self.user.nickname)
         except Exception as error:
-            # TODO Переделать
             print('Невозможно подключиться !')
             print(error)
             exit()

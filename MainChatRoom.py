@@ -43,12 +43,18 @@ class WindowApp:
                     self.protocol.public_key2 = int(key_pub_users_2)
                     self.protocol.private_key = int(self.client.user.key_private)
                     self.client.user.key_partial = self.protocol.generate_partial_key()
+                    print(f'KEYprivate = {self.client.user.key_private}\n'
+                          f'KEYpub_user_1 = {key_pub_users_1}\n'
+                          f'KEYpub_user_2 = {key_pub_users_2}\n')
                 elif data == "101":
                     partial_key = str(self.client.user.key_partial)
                     self.client.send(partial_key)
                     key_partial_user = self.client.listen()
                     self.client.user.full_key = self.protocol.generate_full_key(int(key_partial_user))
                     print(self.client.user.full_key)
+                    print(f'KEYpartial_user_1 = {self.client.user.key_partial}\n'
+                          f'KEYpartial_user_2 = {key_partial_user}\n'
+                          f'KEYfull = {self.client.user.full_key}\n')
                 elif data == "102":
                     msg = 'connection established'
                     self.msg_list.insert(tkinter.END, msg)

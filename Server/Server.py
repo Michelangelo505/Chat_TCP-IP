@@ -70,13 +70,14 @@ class ChatServer:
                     if cod == '100':
                         for user in self.connections:
                             user.key_pub = self.message_kit.get_message(connection=user.connection)
+                            print(f'key_pub = {user.key_pub}')
                         for user in self.connections:
                             package_msg = self.message_kit.get_package(user.key_pub)
                             self.broadcast(package_msg)
                     elif cod == '101':
                         for user in self.connections:
                             user.key_partial = self.message_kit.get_message(connection=user.connection)
-                            print(user.key_partial)
+                            print(f'key_partial = {user.key_partial}')
                         for user in self.connections:
                             package_msg = self.message_kit.get_package(user.key_partial)
                             self.broadcast(package_msg, user)
@@ -116,6 +117,8 @@ class ChatServer:
                     break
 
     def run(self):
+        print("Server started !")
+        print(f'ip_address = {self.ip}\nport = {self.port}')
         while True:
             connection, address = self.socket_server.accept()
             user = UserProfile()
